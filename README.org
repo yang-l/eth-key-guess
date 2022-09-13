@@ -1,0 +1,15 @@
+#+TITLE: Guess A Ethereum Private Key and Check the Balance
+
+(Do not take this fun project too seriously)
+
+The silly purpose of this small code it to randomly generate an Ethereum key and check its balanced to with etherscan.
+
+Note that it would probably take billion of billion years to get a valid private key, and would be much more easier to win two top lottery in a row then this.
+
+* Build
++ =go mod download=
++ =go build=
+
+* Usage
+
+=./eth-key-guess=
