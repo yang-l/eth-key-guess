@@ -1,0 +1,102 @@
+# cat template.yaml | sed s+__HOME__+$HOME+g | kubectl apply -f -
+
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  creationTimestamp: null
+  name: ethereum
+spec: {}
+status: {}
+
+---
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: ethereum-pv
+  namespace: ethereum
+spec:
+  storageClassName: normal
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: __HOME__/.ethereum
+
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: ethereum-pvc
+  namespace: ethereum
+spec:
+  storageClassName: normal
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 6Gi
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: geth
+  name: geth
+  namespace: ethereum
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: geth
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: geth
+    spec:
+      containers:
+      - command:
+        - geth
+        - --syncmode
+        - light
+        - --http
+        - --ipcdisable
+        image: ethereum/client-go:stable
+        name: client-go
+        ports:
+        - containerPort: 8545
+        resources: {}
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - name: ethereum-volume
+          mountPath: /root/.ethereum
+      volumes:
+      - name: ethereum-volume
+        persistentVolumeClaim:
+          claimName: ethereum-pvc
+status: {}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: null
+  labels:
+    app: geth
+  name: geth
+  namespace: ethereum
+spec:
+  ports:
+  - port: 8545
+    protocol: TCP
+    targetPort: 8545
+  selector:
+    app: geth
+status:
+  loadBalancer: {}
