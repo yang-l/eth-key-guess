@@ -32,7 +32,18 @@ func main() {
 		fmt.Printf("\033[2K\rCount %d", count)
 
 		if bal != "0" {
-			fmt.Printf("bal: %s, key: %s, addr: %s\n", bal, privKeyHex, pubAddrHex)
+			match := fmt.Sprintf("bal: %s, key: %s, addr: %s\n", bal, privKeyHex, pubAddrHex)
+			fmt.Printf(match)
+
+			f, e := os.OpenFile("output.txt", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
+			if e != nil {
+				log.Fatal(e)
+			}
+			defer f.Close()
+
+			if _, e = f.WriteString(match); e != nil {
+				log.Fatal(e)
+			}
 		}
 	}
 }
